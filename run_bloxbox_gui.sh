@@ -1,7 +1,7 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 
-ENV="${HOME}/.venv-roblox"
+ENV="${HOME}/.venv-bloxbox"
 
 # 🧾 Help text
 show_help() {
@@ -64,7 +64,7 @@ done
 
 if [ $LOCK == true ];then
 # CAN ONLY BE ONE!!!!
-    APP_LOCK='roblox-gui'
+    APP_LOCK='bloxbox-gui'
     RAM_DIR='/dev/shm'
     BASENAME=$(basename $0)
     RAM_FILE="${RAM_DIR}/${APP_LOCK}-${BASENAME}.lock"
@@ -85,43 +85,47 @@ if [ $LOCK == true ];then
             fi
     else
             echo "ERROR: $RAM_DIR not present to lock app."
-	fi
+    fi
 fi
 
 
 if [ ! -d $ENV ];then
-	# Get the major.minor version of the system's default python3
-	PYTHON_VERSION=$(python3 -c 'import sys; v=sys.version_info; print(f"{v.major}.{v.minor}")')
-	# Validate Python version (3.7+ required)
-	PY_MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
-	PY_MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
-	if [ "$PY_MAJOR" -ne 3 ] || [ "$PY_MINOR" -lt 7 ]; then
-    	echo "❌ Python 3.7+ is required. Found Python $PYTHON_VERSION"
-    	exit 1
-	fi
-	# Try versioned package names first
-	PACKAGES="python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev"
+    # Get the major.minor version of the system's default python3
+    PYTHON_VERSION=$(python3 -c 'import sys; v=sys.version_info; print(f"{v.major}.{v.minor}")')
+    # Validate Python version (3.7+ required)
+    PY_MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
+    PY_MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
+    if [ "$PY_MAJOR" -ne 3 ] || [ "$PY_MINOR" -lt 7 ]; then
+        echo "❌ Python 3.7+ is required. Found Python $PYTHON_VERSION"
+        exit 1
+    fi
+    # Try versioned package names first
+    PACKAGES="python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev"
 
-	for package in $PACKAGES; do
-    	if dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q "install ok installed"; then
-        	echo "✅ Installed... $package"
-    	else
-        	echo "⚠️  $package is not installed: $package"
-        	echo "➡️  Attempting to install $package"
-        	if ! sudo apt-get install -y "$package"; then
-            	echo "⚠️  Failed to install $package — trying fallback: python3-venv or python3-dev"
-            	fallback_pkg="python3-venv"
-            	[ "$package" = "python${PYTHON_VERSION}-dev" ] && fallback_pkg="python3-dev"
-            	sudo apt-get install -y "$fallback_pkg" || {
-                	echo "❌ Failed to install fallback: $fallback_pkg"
-                	exit 1
-            	}
-        	fi
-    	fi
-	done
+    if python3 -c "import tkinter; print('tkinter ok')"|grep -q 'ok';then
+        echo "tkinker installed skipping"
+    else
+    for package in $PACKAGES; do
+        if dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -q "install ok installed"; then
+            echo "✅ Installed... $package"
+        else
+            echo "⚠️  $package is not installed: $package"
+            echo "➡️  Attempting to install $package"
+            if ! sudo apt-get install -y "$package"; then
+                echo "⚠️  Failed to install $package — trying fallback: python3-venv or python3-dev"
+                fallback_pkg="python3-venv"
+                [ "$package" = "python${PYTHON_VERSION}-dev" ] && fallback_pkg="python3-dev"
+                sudo apt-get install -y "$fallback_pkg" || {
+                    echo "❌ Failed to install fallback: $fallback_pkg"
+                    exit 1
+                }
+            fi
+        fi
+    done
+    fi
 
-	packages='libxcb-xinerama0 libxcb-cursor0 libxcb-xfixes0 libxkbcommon-x11-0 libxcb-icccm4'
-	for package in $packages;do
+    packages='python3-tk'
+    for package in $packages;do
             if dpkg-query -W -f='${Status}' $package 2>/dev/null | grep -q "install ok installed";then
                     echo "✅ Installed... $package"
             else
@@ -133,6 +137,13 @@ if [ ! -d $ENV ];then
     #sudo apt install python3.12-venv
     # 1. Create a virtual environment
         python3 -m venv $ENV
+        if [ "$?" != 0 ];then
+            echo "  ERROR: python3 -m venv $ENV did not work."
+            exit
+        fi
+fi
+
+if [ ! -f $ENV/.bloxbox-gui ];then
 
     # 2. Activate it
         source $ENV/bin/activate
@@ -145,6 +156,15 @@ if [ ! -d $ENV ];then
 
     # Roblox
         pip install Pillow
+        if [ "$?" != 0 ];then
+            echo "  ERROR: pip install Pillow did not work."
+            exit
+        fi
+        python3 -c "from PIL import Image; print('Pillow ok')"
+        ### MARK GOOD
+        if [ "$?" == 0 ];then
+            touch $ENV/.bloxbox-gui
+        fi
 fi
 
 source $ENV/bin/activate
@@ -156,12 +176,12 @@ if [ $CODE == true ];then
 elif [ $DEBUG == true ];then
                 export PYTHONWARNINGS="ignore"
                 echo "Starting Client"
-                python3 roblox_launcher.py -d
+                python3 bloxbox-launcher.py -d
                 exit 0
 elif [ $APP == true ];then
                 export PYTHONWARNINGS="ignore"
                 echo "Starting Client"
-                python3 roblox_launcher.py
+                python3 bloxbox-launcher.py
                 exit 0
 fi
 echo "ERROR! Can not run."

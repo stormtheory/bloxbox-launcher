@@ -1,3 +1,5 @@
+#!/usr/bin/bash
+
 ID=$(id -u)
 if [ "$ID" != 0 ];then
     echo " RUN:  sudo $0 ../bloxbox-roblox-launcher.tgz"
@@ -20,7 +22,7 @@ else
     else    
         exit
     fi
-
+fi
     
     SU_USER=
     DIR=/opt/bloxbox-launcher
@@ -30,12 +32,10 @@ else
     APP_WINDOW_TITLE_NAME='BloxBox'
 
     echo "  Installing in at $DIR"
-    echo '';echo "      Press enter to continue..."
-    read -p '      Press enter to continue...'
+    echo '';read -p '      Press enter to continue...' THREE
     sleep 3
 
     tar -C /opt -xzvf $1
-    mv $DIR
     sudo mkdir -p $ETC
    
     chmod 755 $DIR
@@ -51,19 +51,23 @@ else
  
     if [ ! -f $ETC/config.py ];then
        echo '';echo "  INFO: Child's username will be installed into the configuration file. $ETC/config.py"
-       read -p "    What is the child's username?  $> " CHILD_USERNAME
-
-    HOME_DIR=$(echo "/home/$CHILD_USERNAME")
-    if [ ! -d $HOME_DIR ];then
-      echo "$HOME_DIR was not found..."
-      exit
-    fi
+       read -p "    What is the child's username?  $> " child_USERNAME
+   
+        if [ ! -z $child_USERNAME ];then
+            HOME_DIR=$(echo "/home/$child_USERNAME")
+            if [ ! -d $HOME_DIR ];then
+                echo "$HOME_DIR was not found..."
+                exit
+            fi
+        else
+            exit
+        fi
 
 #### CONFIG FILE
 echo "from pathlib import Path
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-CHILD_USER    = \"$CHILD_USERNAME\"               # ← change this to your son's username
+CHILD_USER    = \"$child_USERNAME\"               # ← change this to your son's username
 
 CONFIG_PATH   = \"/etc/bloxbox/roblox_whitelist.json\"   # Approved games list (root-owned)
 APP_WINDOW_TITLE_NAME = \"$APP_WINDOW_TITLE_NAME\"
@@ -80,14 +84,11 @@ FALLBACK_CONFIG   = Path.home() / \".roblox_whitelist.json\"
 FALLBACK_REQUESTS = Path.home() / \".bloxbox_requests.json\"" > $ETC/config.py
         chmod 644 $ETC/config.py
         chown root:root -R $ETC
-    else
+   fi 
         chmod 644 $ETC/config.py
         chown root:root -R $ETC
-    fi
 
-    #sudo python3 $DIR/admin.py init
-
-funcation DEFAULT_JSON {
+DEFAULT_JSON() {
 echo '{
   "games": [
     {
@@ -156,12 +157,12 @@ echo '{
       "description": ""
     }
   ]
-}
-'       > $ETC/$WHITELIST_FILENAME
+}'       > $ETC/$WHITELIST_FILENAME
 chmod 644 $ETC/$WHITELIST_FILENAME
 }
 
-funcation DEFAULT_DESKTOP_ICON {
+
+DEFAULT_DESKTOP_ICON() {
 echo '[Desktop Entry]
 Type=Application
 Name=Roblox - Sober
@@ -177,14 +178,14 @@ chmod 640 $HOME_DIR/$DECKTOP_ICON_FILENAME
 
 
 
-
 if [ ! -f $ETC/$WHITELIST_FILENAME ];then
+    #sudo python3 $DIR/admin.py init
     DEFAULT_JSON
 else
     echo "";echo "  WARNING: this will overwrite the current file at $ETC/$WHITELIST_FILENAME"
-    read -p '     Install Default Whitelist Config of Games?   [y] $> ' ANS
+    read -p "     Install Default Whitelist Config of Games?   [y] $> " SAY
 
-    if [ "$ANS" == y ];then
+    if [ "$SAY" == y ];then
         DEFAULT_JSON
     fi
 fi
@@ -203,5 +204,4 @@ fi
 #su $SU_USER -c 'flatpak install flathub org.vinegarhq.Sober'
 
 
-fi
 exit
