@@ -60,7 +60,8 @@ fi
                 exit
             fi
         else
-            exit
+          echo "ERROR: \$child_USERNAME not found"
+          exit
         fi
 
 #### CONFIG FILE
@@ -159,6 +160,8 @@ echo '{
   ]
 }'       > $ETC/$WHITELIST_FILENAME
 chmod 644 $ETC/$WHITELIST_FILENAME
+echo "Config File placed at: $ETC/$WHITELIST_FILENAME"
+ls -al $ETC/$WHITELIST_FILENAME
 }
 
 
@@ -172,8 +175,12 @@ Terminal=false
 MimeType=application/x-roblox-rbxl;application/x-roblox-rbxlx;x-scheme-handler/roblox-studio;x-scheme-handler/roblox-studio-auth
 Categories=Game
 X-Flatpak=org.vinegarhq.Vinegar
-Name[en_US]=Roblox - Sober'       > $HOME_DIR/$DECKTOP_ICON_FILENAME
-chmod 640 $HOME_DIR/$DECKTOP_ICON_FILENAME
+Name[en_US]=Roblox - Sober'       > $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
+chmod 755 $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
+chown root:root $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
+#chown $child_USERNAME:$child_USERNAME $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
+echo "Desktop Icon placed at: $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME"
+ls -al $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
 }
 
 
@@ -190,6 +197,34 @@ else
     fi
 fi
 
+
+if [ -z $child_USERNAME ];then
+       echo '';read -p "    What is the child's username?  $> " child_USERNAME
+   
+        if [ ! -z $child_USERNAME ];then
+            HOME_DIR=$(echo "/home/$child_USERNAME")
+            if [ ! -d $HOME_DIR ];then
+                echo "$HOME_DIR was not found..."
+                exit
+            fi
+        else
+            echo "ERROR: \$child_USERNAME not found"
+            exit
+        fi
+fi
+
+if [ ! -z $child_USERNAME ];then
+  if [ ! -f $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME ];then
+      DEFAULT_DESKTOP_ICON
+  else
+      echo "";echo "  WARNING: this will overwrite the current file at $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME"
+      read -p "     Install Default Desktop Icon?   [y] $> " SAYyou
+
+      if [ "$SAYyou" == y ];then
+          DEFAULT_DESKTOP_ICON
+      fi
+  fi
+fi
 #sudo apt install flatpak
 
 ##### Not sure which is needed
