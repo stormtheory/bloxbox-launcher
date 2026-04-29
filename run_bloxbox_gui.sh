@@ -154,7 +154,7 @@ if [ ! -d $ENV ];then
     
     fi
 
-    packages='python3-tk'
+    packages='python3-tk python3-pil.imagetk'
     for package in $packages;do
             if dpkg-query -W -f='${Status}' $package 2>/dev/null | grep -q "install ok installed";then
                     echo "✅ Installed... $package"

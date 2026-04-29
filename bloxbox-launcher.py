@@ -690,13 +690,22 @@ class RequestDialog:
                 return
             try:
                 from PIL import Image, ImageTk
+                print(f"[bloxbox] resizing {place_id}...")
                 with urllib.request.urlopen(thumb_url, timeout=8) as r:
                     img   = Image.open(io.BytesIO(r.read()))
                     img   = img.resize((100, 100), Image.LANCZOS)
+                    print(f"[bloxbox] creating PhotoImage {place_id}...")
                     photo = ImageTk.PhotoImage(img)
+                    print(f"[bloxbox] PhotoImage created {place_id}")
                     GameCard._image_refs.append(photo)  # Prevent GC
                     win.after(0, lambda: thumb_label.config(image=photo, text=""))
+            except ImportError:
+                print(f"[bloxbox] Pillow not installed")
+                self.after(0, lambda: self._set_placeholder("🎮"))
             except Exception:
+                import traceback
+                print(f"[bloxbox] Thumbnail render failed for {place_id}: {e}")
+                traceback.print_exc()
                 win.after(0, lambda: thumb_label.config(text="🎮"))
 
         threading.Thread(target=load_thumb, daemon=True).start()
@@ -1040,7 +1049,9 @@ class GameCard(tk.Frame):
         — touching Tkinter widgets directly from threads causes crashes.
         """
         place_id = self.game.get("place_id", "")
+        print(f"[bloxbox] Loading thumbnail for {place_id}")
         img      = fetch_thumbnail_image(place_id)
+        print(f"[bloxbox] fetch_thumbnail_image returned: {img}")
 
         if img is None:
             # No thumbnail available — swap spinner for a game controller emoji
@@ -1068,11 +1079,13 @@ class GameCard(tk.Frame):
 
     def _set_thumbnail(self, photo):
         """Swap the loading placeholder with the actual thumbnail image."""
+        print(f"[bloxbox] _set_thumbnail called, widget exists: {self.thumb_label.winfo_exists()}")
         if self.thumb_label and self.thumb_label.winfo_exists():
             self.thumb_label.config(
                 image=photo, text="",
                 width=THUMB_SIZE, height=THUMB_SIZE
             )
+            print(f"[bloxbox] thumbnail set ok")
 
     def _set_placeholder(self, emoji: str):
         """Replace the spinner with a fallback emoji (Pillow missing or API failed)."""
