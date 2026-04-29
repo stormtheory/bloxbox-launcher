@@ -125,6 +125,10 @@ def save_request(url: str, note: str) -> bool:
         print(f"[launcher] Failed to save request: {e}")
         return False
 
+# 
+def terminateSober():
+    result =subprocess.run("pkill sober", shell=True, check=False)
+    print(f"[bloxbox] pkill exit code: {result.returncode}")
 
 # ── Thumbnail fetching ────────────────────────────────────────────────────────
 
@@ -238,8 +242,7 @@ def _monitor_sober_log(proc: subprocess.Popen, game_name: str):
 
     if detected_error:
         title, message = detected_error
-        result =subprocess.run("pkill sober", shell=True, check=False)
-        print(f"[bloxbox] pkill exit code: {result.returncode}")
+        terminateSober()
 
         _tk_root_ref.after(0, lambda: messagebox.showerror(
             f"⚠️  {title} — {game_name}", message
@@ -537,7 +540,7 @@ class GameCard(tk.Frame):
         """Play button click handler."""
         result = subprocess.run("ps -ef | grep -v grep | grep sober", shell=True)
         if result.returncode == 0:
-            subprocess.run("pkill sober", shell=True)
+            terminateSober()
 
         launch_game(
             place_id=self.game.get("place_id", ""),
