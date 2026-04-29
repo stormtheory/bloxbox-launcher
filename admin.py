@@ -112,7 +112,7 @@ def save_requests(requests: list):
     with open(REQUESTS_PATH, "w") as f:
         json.dump({"requests": requests}, f, indent=2)
     # 622 = root read/write, everyone else write-only (can't read others' requests)
-    os.chmod(REQUESTS_PATH, 0o622)
+    os.chmod(REQUESTS_PATH, 0o644)
     print(f"[admin] ✅  Requests file saved → {REQUESTS_PATH}")
 
 
@@ -227,7 +227,7 @@ def cmd_requests():
     print(f"\n── Pending Game Requests ({len(requests)}) ──────────────────────────────")
     for i, r in enumerate(requests, 1):
         print(f"\n  [{i}] {r.get('timestamp', 'unknown time')}")
-        print(f"      Game: {r.get('game_name', '(none)')}  (Place ID: {r.get('place_id', '?')})")
+        print(f"      Game: {r.get('game_name', '(none)')}  (Place ID: {r.get('place_id', '?')})  (URL: {r.get('url', '?')})")
         note = r.get('note', '')
         if note:
             print(f"      Note: {note}")
@@ -240,10 +240,11 @@ def cmd_requests():
         if 0 <= idx < len(requests):
             place_id  = requests[idx].get("place_id", "")
             game_name = requests[idx].get("game_name", "")
+            url = requests[idx].get("url", "")
             print(f"\n[admin] Pre-filling: {game_name} (Place ID: {place_id})")
 
             # Re-use add flow with URL pre-populated
-            name     = input(f"Display name (shown in launcher): ").strip() or f"Game {place_id}"
+            name     = input(f"Display name (shown in launcher): ").strip() or f"{game_name} {place_id}"
             desc     = input("Short description (optional): ").strip()
 
             print(f"\n  Name:     {name}")
@@ -253,7 +254,7 @@ def cmd_requests():
                 if any(g["place_id"] == place_id for g in data["games"]):
                     print(f"[admin] ⚠️  Already in whitelist.")
                 else:
-                    data["games"].append({"name": name, "place_id": place_id, "description": desc})
+                    data["games"].append({"name": name, "place_id": place_id, "description": desc, "url": url})
                     save_config(data)
                     print(f"[admin] ✅  '{name}' approved and added to whitelist.")
 

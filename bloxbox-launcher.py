@@ -106,7 +106,7 @@ def load_requests() -> list:
     return []
 
 
-def save_request(place_id: str, game_name: str, note: str) -> bool:
+def save_request(place_id: str, game_name: str, note: str, url: str = "") -> bool:
     print(f"[bloxbox] save_request called: {place_id} / {game_name}")
     print(f"[bloxbox] REQUESTS_PATH: {REQUESTS_PATH}")
     print(f"[bloxbox] File exists: {os.path.exists(REQUESTS_PATH)}")
@@ -117,6 +117,7 @@ def save_request(place_id: str, game_name: str, note: str) -> bool:
     requests.append({
         "place_id":  place_id.strip(),
         "game_name": game_name.strip(),
+        "url":       url.strip(),
         "note":      note.strip(),
         "timestamp": datetime.now().isoformat(timespec="seconds")
     })
@@ -347,7 +348,7 @@ class RequestDialog:
 
         # If a game was requested, show the confirm dialog
         if self._pending_place_id:
-            self._confirm_request(self._pending_place_id, self._pending_game_name)
+            self._confirm_request(self._pending_place_id, self._pending_game_name, "")
 
     def _get_inject_js(self) -> str:
         """
@@ -458,18 +459,17 @@ class RequestDialog:
                         match = re.search(r"/games/(\d+)", url)
                         if match:
                             place_id = match.group(1)
-                            # Schedule overlay on main Tkinter thread
-                            dialog.parent.after(0, lambda pid=place_id: show_overlay(pid))
+                            # Small delay — Roblox SPA may still be transitioning URLs
+                            _tk_root_ref.after(300, lambda pid=place_id: show_overlay(pid, url))
                         else:
-                            # Not a game page — hide the overlay
-                            dialog.parent.after(0, hide_overlay)
+                            _tk_root_ref.after(0, hide_overlay)
 
                 except Exception as e:
                     print(f"[bloxbox] URL poll error: {e}")
 
                 time.sleep(0.5)
 
-        def show_overlay(place_id: str):
+        def show_overlay(place_id: str, url: str):
             """
             Show a request bar docked to the bottom of the main launcher window.
             Replaces any existing overlay.
@@ -506,12 +506,12 @@ class RequestDialog:
             # Fetch game name in background and update the label
             name_label = win.children["game_label"]
             def load_name():
-                name = fetch_game_name(place_id) or f"Place ID: {place_id}"
+                game_name = fetch_game_name(place_id) or f"Place ID: {place_id}"
                 # Check widget still exists before updating — thread may outlive the window
                 try:
                     if win.winfo_exists() and name_label.winfo_exists():
                         win.after(0, lambda: name_label.config(
-                            text=f"🎮  {name}  •  ID: {place_id}"
+                            text=f"🎮  {game_name}  •  ID: {place_id}"
                         ))
                 except Exception:
                     pass
@@ -538,7 +538,7 @@ class RequestDialog:
                 activebackground="#1e4d6b",
                 relief="flat", cursor="hand2",
                 padx=14, pady=8,
-                command=lambda: on_request(place_id)
+                command=lambda: on_request(place_id, fetch_game_name(place_id), url)
             ).pack(side="right", padx=(0, 6))
 
             # Re-dock if the main window is moved or resized
@@ -566,15 +566,15 @@ class RequestDialog:
                     pass
                 overlay_win[0] = None
 
-        def on_request(place_id: str):
+        def on_request(place_id: str, game_name: str, url: str):
             print(f"[bloxbox] Request triggered for place ID: {place_id}")
             detecting[0] = False
             hide_overlay()
             dialog._pending_place_id  = place_id
-            dialog._pending_game_name = ""
+            dialog._pending_game_name = fetch_game_name(place_id)
             # Schedule confirm dialog on Tkinter main thread BEFORE destroying webview
             # — don't wait for __init__ to resume, call it directly
-            _tk_root_ref.after(100, lambda: dialog._confirm_request(place_id, ""))
+            _tk_root_ref.after(100, lambda: dialog._confirm_request(place_id, game_name, url))
             # Destroy all webview windows
             for w in webview.windows:
                 w.destroy()
@@ -606,7 +606,7 @@ class RequestDialog:
         detecting[0] = False
         hide_overlay()
 
-    def _confirm_request(self, place_id: str, game_name: str):
+    def _confirm_request(self, place_id: str, game_name: str, url: str):
         """
         Tkinter confirmation dialog shown after child picks a game in the browser.
         Shows thumbnail preview, optional note field, and submit/cancel buttons.
@@ -650,7 +650,7 @@ class RequestDialog:
 
         # Place ID shown in small muted text for transparency
         tk.Label(
-            win, text=f"Place ID: {place_id}",
+            win, text=f"Place ID: {place_id} \n {url}",
             font=("Courier", 9),
             bg=BG_COLOR, fg="#444"
         ).pack()
@@ -693,7 +693,8 @@ class RequestDialog:
             ok = save_request(
                 place_id  = place_id,
                 game_name = game_name,
-                note      = note_entry.get().strip()
+                note      = note_entry.get().strip(),
+                url       = url
             )
             win.destroy()
             if ok:
@@ -934,7 +935,8 @@ class RequestDialogFallback(tk.Toplevel):
         ok = save_request(
             place_id  = self.fetched_place_id,
             game_name = self.fetched_game_name,
-            note      = self.note_entry.get().strip()
+            note      = self.note_entry.get().strip(),
+            url       = ""
         )
         self.destroy()
         if ok:
