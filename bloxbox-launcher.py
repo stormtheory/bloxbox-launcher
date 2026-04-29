@@ -25,8 +25,13 @@ from datetime import datetime
 import importlib.util
 import sys
 import os
-import webview
 import time
+import hashlib
+
+try:
+    import webview
+except:
+    print("Can't import webview.")
 
 # Load system config from /etc — keeps config out of the app directory
 _spec = importlib.util.spec_from_file_location("config", "/etc/bloxbox/config.py")
