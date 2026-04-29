@@ -1,5 +1,10 @@
 #!/usr/bin/bash
 
+# DEFAULTS
+  LOCK_REQUEST_GAMES=False   # True / False
+  LOCK_REQUEST_PIN_PASS_HASH=""
+  child_USERNAME=
+
 ID=$(id -u)
 if [ "$ID" != 0 ];then
     echo " RUN:  sudo $0 ../bloxbox-roblox-launcher.tgz"
@@ -30,6 +35,7 @@ fi
     DECKTOP_ICON_FILENAME=Roblox-Sober.desktop
     WHITELIST_FILENAME=roblox_whitelist.json
     APP_WINDOW_TITLE_NAME='BloxBox'
+    
 
     echo "  Installing in at $DIR"
     echo '';read -p '      Press enter to continue...' THREE
@@ -71,6 +77,23 @@ INSTALL_ETC_CONFIG() {
           chmod 600 $ETC/old.config.py
         fi
 
+        while true;do
+          read -p "  Lock the request for games behind a password/pin?  [y/n] $> " YESSIR
+          if [ "$YESSIR" == y ];then
+              read -rsp "   Type your password/pin/passcode you would like to use to protect the Request Games button $> " PINPASSWORD
+              COUNT=0
+              COUNT=$(echo -n "$PINPASSWORD" | wc -c)
+              if [ "$COUNT" -ge 2 ];then
+                LOCK_REQUEST_PIN_PASS_HASH=$(echo -n "$PINPASSWORD" | sha256sum | awk '{print $1}')
+                LOCK_REQUEST_GAMES=True
+                break        
+              else
+                echo " ### ERROR: needs to be greater than 2 characters... ###"
+                continue
+              fi
+          fi
+        done
+
 #### CONFIG FILE
 echo "from pathlib import Path
 
@@ -89,6 +112,9 @@ REQUESTS_PATH = f\"/home/{CHILD_USER}/.cache/bloxbox_launcher/requests.json\"
 # Thumbnail cache directory — stored in child's home, safe to delete any time
 CACHE_DIR     = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"thumbnails\"
 CLIENT_REQUESTS_PATH = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"requests.json\"
+
+LOCK_REQUEST_GAMES = \"$LOCK_REQUEST_GAMES\" # True / False
+LOCK_REQUEST_PIN_PASS_HASH = \"$LOCK_REQUEST_PIN_PASS_HASH\"
 
 # Fallback configs for testing without root (remove in production)
 FALLBACK_CONFIG   = Path.home() / \".roblox_whitelist.json\"
