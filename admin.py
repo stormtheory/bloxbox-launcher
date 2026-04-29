@@ -112,7 +112,9 @@ def save_requests(requests: list):
     with open(REQUESTS_PATH, "w") as f:
         json.dump({"requests": requests}, f, indent=2)
     # 622 = root read/write, everyone else write-only (can't read others' requests)
-    os.chmod(REQUESTS_PATH, 0o644)
+    import shutil
+    os.chmod(REQUESTS_PATH, 0o640)
+    shutil.chown(REQUESTS_PATH, user=CHILD_USER, group=CHILD_USER)
     print(f"[admin] ✅  Requests file saved → {REQUESTS_PATH}")
 
 
@@ -244,7 +246,7 @@ def cmd_requests():
             print(f"\n[admin] Pre-filling: {game_name} (Place ID: {place_id})")
 
             # Re-use add flow with URL pre-populated
-            name     = input(f"Display name (shown in launcher): ").strip() or f"{game_name} {place_id}"
+            name     = input(f"Display name (shown in launcher): ").strip() or f"{game_name}"
             desc     = input("Short description (optional): ").strip()
 
             print(f"\n  Name:     {name}")

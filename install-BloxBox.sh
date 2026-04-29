@@ -98,17 +98,20 @@ echo '{
     {
       "name": "[\ud83c\udf7c] Welcome to Bloxburg \ud83c\udfe1",
       "place_id": "185655149",
-      "description": ""
+      "description": "",
+      "url": "https://www.roblox.com/games/185655149/Welcome-to-Bloxburg"
     },
     {
-      "name": "\ud83d\udc23 Creatures of Sonaria \ud83d\udc07 Survive Kaiju Animals",
+      "name": "\ud83d\udc23 Creatures of Sonaria \ud83d\udc07",
       "place_id": "5233782396",
-      "description": ""
+      "description": "",
+      "url": "https://www.roblox.com/games/5233782396/Creatures-of-Sonaria-Survive-Kaiju-Animals"
     },
     {
-      "name": "\ud83c\udfc0Basketball Legends\ud83c\udfc0",
+      "name": "\ud83c\udfc0Basketball Legends\ud83c\udfc0 14259168147",
       "place_id": "14259168147",
-      "description": ""
+      "description": "",
+      "url": "https://www.roblox.com/games/14259168147/Basketball-Legends"
     },
     {
       "name": "Bike of Hell",
@@ -159,9 +162,15 @@ echo '{
       "name": "United States Capitol [RP]",
       "place_id": "120992074793516",
       "description": ""
+    },
+    {
+      "name": "Washington-District-of-Columbia",
+      "place_id": "16545924458",
+      "description": ""
     }
   ]
-}'       > $ETC/$WHITELIST_FILENAME
+}
+'       > $ETC/$WHITELIST_FILENAME
 chmod 644 $ETC/$WHITELIST_FILENAME
 echo "Config File placed at: $ETC/$WHITELIST_FILENAME"
 ls -al $ETC/$WHITELIST_FILENAME
