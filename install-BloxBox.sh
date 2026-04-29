@@ -45,7 +45,7 @@ fi
     chmod 644 $DIR/*.py
     chmod 600 $DIR/tar-up.sh
     chmod 644 $DIR/icon-roblox.png
-    chmod 640 $DIR/admin.py
+    chmod 700 $DIR/admin.py
     chown root:root -R $DIR
     chown root:root -R $ETC
  
@@ -73,12 +73,15 @@ CHILD_USER    = \"$child_USERNAME\"               # ← change this to your son'
 CONFIG_PATH   = \"/etc/bloxbox/roblox_whitelist.json\"   # Approved games list (root-owned)
 APP_WINDOW_TITLE_NAME = \"$APP_WINDOW_TITLE_NAME\"
 
+ROBLOX_GAME_SEARCH_URL = \"https://www.roblox.com/charts?device=computer&country=us\"
+
 # Requests file — lives in the child's home directory so they can write to it freely
 # Parent reads it with: sudo cat /home/CHILDNAME/.bloxbox_requests.json
-REQUESTS_PATH = f\"/home/{CHILD_USER}/.bloxbox_requests.json\"
+REQUESTS_PATH = f\"/home/{CHILD_USER}/.cache/bloxbox_launcher/requests.json\"
 
 # Thumbnail cache directory — stored in child's home, safe to delete any time
 CACHE_DIR     = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"thumbnails\"
+CLIENT_REQUESTS_PATH = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"requests.json\"
 
 # Fallback configs for testing without root (remove in production)
 FALLBACK_CONFIG   = Path.home() / \".roblox_whitelist.json\"
@@ -95,16 +98,25 @@ echo '{
     {
       "name": "[\ud83c\udf7c] Welcome to Bloxburg \ud83c\udfe1",
       "place_id": "185655149",
-      "description": ""
+      "description": "",
+      "url": "https://www.roblox.com/games/185655149/Welcome-to-Bloxburg"
     },
     {
-      "name": "\ud83d\udc23 Creatures of Sonaria \ud83d\udc07 Survive Kaiju Animals",
+      "name": "\ud83d\udc23 Creatures of Sonaria \ud83d\udc07",
       "place_id": "5233782396",
-      "description": ""
+      "description": "",
+      "url": "https://www.roblox.com/games/5233782396/Creatures-of-Sonaria-Survive-Kaiju-Animals"
     },
     {
       "name": "\ud83c\udfc0Basketball Legends\ud83c\udfc0",
       "place_id": "14259168147",
+      "description": "",
+      "url": "https://www.roblox.com/games/14259168147/Basketball-Legends"
+    },
+    {
+      "name": "Brookhaven \ud83c\udfe1",
+      "place_id": "4924922222",
+      "url": "https://www.roblox.com/games/4924922222/Brookhaven-RP",
       "description": ""
     },
     {
@@ -123,11 +135,6 @@ echo '{
       "description": ""
     },
     {
-      "name": "PET PARTY \ud83c\udf89 RP",
-      "place_id": "11497119928",
-      "description": ""
-    },
-    {
       "name": "Driving-Empire-Car-Racing",
       "place_id": "3351674303",
       "description": ""
@@ -143,11 +150,6 @@ echo '{
       "description": ""
     },
     {
-      "name": "Brookhaven \ud83c\udfe1",
-      "place_id": "4924922222",
-      "description": ""
-    },
-    {
       "name": "Basketball: Zero",
       "place_id": "130739873848552",
       "description": ""
@@ -156,9 +158,33 @@ echo '{
       "name": "United States Capitol [RP]",
       "place_id": "120992074793516",
       "description": ""
+    },
+    {
+      "name": "Washington-District-of-Columbia",
+      "place_id": "16545924458",
+      "description": ""
+    },
+    {
+      "name": "Thomas and friends musuem",
+      "place_id": "115078406417772",
+      "description": "",
+      "url": "https://www.roblox.com/games/115078406417772/Thomas-and-friends-musuem"
+    },
+    {
+      "name": "Math Tower \ud83e\udde0",
+      "place_id": "76490888522129",
+      "description": "",
+      "url": "https://www.roblox.com/games/76490888522129/Math-Tower"
+    },
+    {
+      "name": "Infinite Math \ud83e\udde0",
+      "place_id": "77972109461154",
+      "description": "",
+      "url": "https://www.roblox.com/games/77972109461154/Infinite-Math"
     }
   ]
-}'       > $ETC/$WHITELIST_FILENAME
+}
+'       > $ETC/$WHITELIST_FILENAME
 chmod 644 $ETC/$WHITELIST_FILENAME
 echo "Config File placed at: $ETC/$WHITELIST_FILENAME"
 ls -al $ETC/$WHITELIST_FILENAME
@@ -186,7 +212,7 @@ ls -al $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
 
 
 if [ ! -f $ETC/$WHITELIST_FILENAME ];then
-    #sudo python3 $DIR/admin.py init
+    sudo python3 $DIR/admin.py init
     DEFAULT_JSON
 else
     echo "";echo "  WARNING: this will overwrite the current file at $ETC/$WHITELIST_FILENAME"
