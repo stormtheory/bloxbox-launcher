@@ -45,7 +45,7 @@ fi
     chmod 644 $DIR/*.py
     chmod 600 $DIR/tar-up.sh
     chmod 644 $DIR/icon-roblox.png
-    chmod 640 $DIR/admin.py
+    chmod 700 $DIR/admin.py
     chown root:root -R $DIR
     chown root:root -R $ETC
  
@@ -73,12 +73,15 @@ CHILD_USER    = \"$child_USERNAME\"               # ← change this to your son'
 CONFIG_PATH   = \"/etc/bloxbox/roblox_whitelist.json\"   # Approved games list (root-owned)
 APP_WINDOW_TITLE_NAME = \"$APP_WINDOW_TITLE_NAME\"
 
+ROBLOX_GAME_SEARCH_URL = \"https://www.roblox.com/charts?device=computer&country=us\"
+
 # Requests file — lives in the child's home directory so they can write to it freely
 # Parent reads it with: sudo cat /home/CHILDNAME/.bloxbox_requests.json
-REQUESTS_PATH = f\"/home/{CHILD_USER}/.bloxbox_requests.json\"
+REQUESTS_PATH = f\"/home/{CHILD_USER}/.cache/bloxbox_launcher/requests.json\"
 
 # Thumbnail cache directory — stored in child's home, safe to delete any time
 CACHE_DIR     = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"thumbnails\"
+CLIENT_REQUESTS_PATH = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"requests.json\"
 
 # Fallback configs for testing without root (remove in production)
 FALLBACK_CONFIG   = Path.home() / \".roblox_whitelist.json\"
@@ -186,7 +189,7 @@ ls -al $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
 
 
 if [ ! -f $ETC/$WHITELIST_FILENAME ];then
-    #sudo python3 $DIR/admin.py init
+    sudo python3 $DIR/admin.py init
     DEFAULT_JSON
 else
     echo "";echo "  WARNING: this will overwrite the current file at $ETC/$WHITELIST_FILENAME"

@@ -227,7 +227,7 @@ def cmd_requests():
     print(f"\n── Pending Game Requests ({len(requests)}) ──────────────────────────────")
     for i, r in enumerate(requests, 1):
         print(f"\n  [{i}] {r.get('timestamp', 'unknown time')}")
-        print(f"      URL:  {r.get('url', '(none)')}")
+        print(f"      Game: {r.get('game_name', '(none)')}  (Place ID: {r.get('place_id', '?')})")
         note = r.get('note', '')
         if note:
             print(f"      Note: {note}")
@@ -238,11 +238,11 @@ def cmd_requests():
     if ans.isdigit():
         idx = int(ans) - 1
         if 0 <= idx < len(requests):
-            url = requests[idx].get("url", "")
-            print(f"\n[admin] Pre-filling URL: {url}")
+            place_id  = requests[idx].get("place_id", "")
+            game_name = requests[idx].get("game_name", "")
+            print(f"\n[admin] Pre-filling: {game_name} (Place ID: {place_id})")
 
             # Re-use add flow with URL pre-populated
-            place_id = find_place_id(url)
             name     = input(f"Display name (shown in launcher): ").strip() or f"Game {place_id}"
             desc     = input("Short description (optional): ").strip()
 
@@ -280,6 +280,7 @@ def cmd_init():
     First-time setup: create both config files with correct permissions.
     Run this once after copying the scripts to /opt/bloxbox-launcher/.
     """
+    import shutil
     # ── Whitelist config ──────────────────────────────────────────────────
     if os.path.exists(CONFIG_PATH):
         if input(f"Whitelist already exists at {CONFIG_PATH}. Overwrite? [y/N]: ").strip().lower() != "y":
@@ -290,18 +291,23 @@ def cmd_init():
     else:
         save_config({"games": []})
         print(f"[admin] ✅  Whitelist created → {CONFIG_PATH}")
+        shutil.chown(CONFIG_PATH, user='root', group='root')
+        os.chmod(CONFIG_PATH, 0o644)
 
     # ── Requests file ─────────────────────────────────────────────────────
     if not os.path.exists(REQUESTS_PATH):
         save_requests([])
         print(f"[admin] ✅  Requests file created → {REQUESTS_PATH}")
+        shutil.chown(REQUESTS_PATH, user=CHILD_USER, group=CHILD_USER)
+        os.chmod(REQUESTS_PATH, 0o640)
     else:
         print(f"[admin] ℹ️   Requests file already exists → {REQUESTS_PATH}")
-
+        shutil.chown(REQUESTS_PATH, user=CHILD_USER, group=CHILD_USER)
+        os.chmod(REQUESTS_PATH, 0o640)
+    
     print("\n[admin] Setup complete. Next steps:")
     print("  sudo python3 admin.py add      — approve your first game")
     print("  python3 bloxbox-launcher.py    — launch the kid-facing launcher")
-
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
