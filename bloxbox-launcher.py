@@ -65,6 +65,9 @@ CARD_HEIGHT   = 300
 THUMB_SIZE    = 160             # Thumbnail display size in pixels
 COLS          = 4               # Game cards per row
 
+# ── Globals ────────────────────────────────────────────────────────────
+# Global root window reference — lets background threads schedule UI calls safely
+_tk_root_ref: tk.Tk | None = None
 
 # ── Config helpers ────────────────────────────────────────────────────────────
 
@@ -189,6 +192,58 @@ def fetch_thumbnail_image(place_id: str):
         print(f"[launcher] Thumbnail download failed for place {place_id}: {e}")
         return None
 
+def _monitor_sober_log(proc: subprocess.Popen, game_name: str):
+    """
+    Background thread: reads Sober's log line by line watching for errors.
+    On error: kills Sober, shows a friendly popup on the main thread.
+    """
+    ERROR_PATTERNS = {
+        "App not yet initialized, returning from game": (
+            "Login / Session Error",
+            "Roblox kicked back to the home screen before the game loaded.\n\n"
+            "Fix: Open Sober manually, log in again, then try Bloxbox."
+        ),
+        "HTTP error code:`nil`": (
+            "Network / Auth Error",
+            "Roblox reported a network or authentication error.\n\n"
+            "Check your internet connection and try again."
+        ),
+        "524": (
+            "Error 524 — Server Timeout",
+            "The Roblox game server didn't respond in time.\n\n"
+            "This is a temporary Roblox issue — wait a minute and try again."
+        ),
+        "SessionReporterState_GameExitRequested": (
+            "Kicked by Server",
+            "The Roblox server ended the session before the game started.\n\n"
+            "The server may be full or restarting — try again shortly."
+        ),
+    }
+
+    detected_error = None
+
+    try:
+        for raw_line in proc.stdout:
+            line = raw_line.decode("utf-8", errors="replace").strip()
+            for pattern, error_info in ERROR_PATTERNS.items():
+                if pattern in line:
+                    detected_error = error_info
+                    print(f"[bloxbox] Error detected: {pattern}")
+                    break
+            if detected_error:
+                break
+    except Exception as e:
+        print(f"[bloxbox] Monitor thread error: {e}")
+        return
+
+    if detected_error:
+        title, message = detected_error
+        result =subprocess.run("pkill sober", shell=True, check=False)
+        print(f"[bloxbox] pkill exit code: {result.returncode}")
+
+        _tk_root_ref.after(0, lambda: messagebox.showerror(
+            f"⚠️  {title} — {game_name}", message
+        ))
 
 # ── Game launching ────────────────────────────────────────────────────────────
 
@@ -212,11 +267,16 @@ def launch_game(place_id: str, game_name: str):
     # Pass the full roblox:// URI — bare place ID is silently ignored by Sober.
     # Popen (not run) so the UI stays responsive while the game loads.
     try:
-        subprocess.Popen(
+        proc = subprocess.Popen(
             ["flatpak", "run", "org.vinegarhq.Sober", uri],
-            stdout=subprocess.DEVNULL,  # Suppress Sober's verbose stdout
-            stderr=subprocess.DEVNULL   # Suppress Sober's verbose stderr
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
         )
+        threading.Thread(
+            target=_monitor_sober_log,
+            args=(proc, game_name),
+            daemon=True
+        ).start()
         return  # Handed off to Sober — done
     except FileNotFoundError:
         print("[launcher] flatpak not found, falling back to xdg-open...")
@@ -519,6 +579,8 @@ class LauncherApp(tk.Tk):
         self.title(WINDOW_TITLE)
         self.configure(bg=BG_COLOR)
         self.resizable(True, True)
+        global _tk_root_ref
+        _tk_root_ref = self
         self._build_ui()
 
     def _build_ui(self):

@@ -180,6 +180,11 @@ elif [ $DEBUG == true ];then
                 exit 0
 elif [ $APP == true ];then
                 export PYTHONWARNINGS="ignore"
+
+                if flatpak --version &>/dev/null; then
+                    flatpak update org.vinegarhq.Sober
+                fi
+
                 echo "Starting Client"
                 python3 bloxbox-launcher.py
                 exit 0
