@@ -1,5 +1,10 @@
 #!/usr/bin/bash
 
+# DEFAULTS
+  LOCK_REQUEST_GAMES=False   # True / False
+  LOCK_REQUEST_PIN_PASS_HASH=""
+  child_USERNAME=
+
 ID=$(id -u)
 if [ "$ID" != 0 ];then
     echo " RUN:  sudo $0 ../bloxbox-roblox-launcher.tgz"
@@ -30,6 +35,7 @@ fi
     DECKTOP_ICON_FILENAME=Roblox-Sober.desktop
     WHITELIST_FILENAME=roblox_whitelist.json
     APP_WINDOW_TITLE_NAME='BloxBox'
+    
 
     echo "  Installing in at $DIR"
     echo '';read -p '      Press enter to continue...' THREE
@@ -48,8 +54,10 @@ fi
     chmod 700 $DIR/admin.py
     chown root:root -R $DIR
     chown root:root -R $ETC
- 
-    if [ ! -f $ETC/config.py ];then
+
+
+INSTALL_ETC_CONFIG() {
+    if [ -z $child_USERNAME ];then
        echo '';echo "  INFO: Child's username will be installed into the configuration file. $ETC/config.py"
        read -p "    What is the child's username?  $> " child_USERNAME
    
@@ -63,6 +71,28 @@ fi
           echo "ERROR: \$child_USERNAME not found"
           exit
         fi
+
+        if [ -f $ETC/config.py ];then
+          mv $ETC/config.py $ETC/old.config.py
+          chmod 600 $ETC/old.config.py
+        fi
+
+        while true;do
+          read -p "  Lock the request for games behind a password/pin?  [y/n] $> " YESSIR
+          if [ "$YESSIR" == y ];then
+              read -rsp "   Type your password/pin/passcode you would like to use to protect the Request Games button $> " PINPASSWORD
+              COUNT=0
+              COUNT=$(echo -n "$PINPASSWORD" | wc -c)
+              if [ "$COUNT" -ge 2 ];then
+                LOCK_REQUEST_PIN_PASS_HASH=$(echo -n "$PINPASSWORD" | sha256sum | awk '{print $1}')
+                LOCK_REQUEST_GAMES=True
+                break        
+              else
+                echo " ### ERROR: needs to be greater than 2 characters... ###"
+                continue
+              fi
+          fi
+        done
 
 #### CONFIG FILE
 echo "from pathlib import Path
@@ -83,6 +113,9 @@ REQUESTS_PATH = f\"/home/{CHILD_USER}/.cache/bloxbox_launcher/requests.json\"
 CACHE_DIR     = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"thumbnails\"
 CLIENT_REQUESTS_PATH = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"requests.json\"
 
+LOCK_REQUEST_GAMES = \"$LOCK_REQUEST_GAMES\" # True / False
+LOCK_REQUEST_PIN_PASS_HASH = \"$LOCK_REQUEST_PIN_PASS_HASH\"
+
 # Fallback configs for testing without root (remove in production)
 FALLBACK_CONFIG   = Path.home() / \".roblox_whitelist.json\"
 FALLBACK_REQUESTS = Path.home() / \".bloxbox_requests.json\"" > $ETC/config.py
@@ -91,8 +124,14 @@ FALLBACK_REQUESTS = Path.home() / \".bloxbox_requests.json\"" > $ETC/config.py
    fi 
         chmod 644 $ETC/config.py
         chown root:root -R $ETC
+}
 
 DEFAULT_JSON() {
+  if [ -f $ETC/$WHITELIST_FILENAME ];then
+    mv $ETC/$WHITELIST_FILENAME $ETC/old.$WHITELIST_FILENAME
+    chmod 600 $ETC/old.$WHITELIST_FILENAME
+  fi
+
 echo '{
   "games": [
     {
@@ -211,11 +250,23 @@ ls -al $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
 
 
 
+if [ ! -f $ETC/config.py ];then
+  INSTALL_ETC_CONFIG
+else
+    echo "";echo "  INFO: this will backup the current file at $ETC/old.config.py"
+    read -p "     Install [Default/New/Fresh]  /etc/config.py?   [y] $> " SAYnoMore
+
+    if [ "$SAYnoMore" == y ];then
+        INSTALL_ETC_CONFIG
+    fi
+fi
+
+
 if [ ! -f $ETC/$WHITELIST_FILENAME ];then
     sudo python3 $DIR/admin.py init
     DEFAULT_JSON
 else
-    echo "";echo "  WARNING: this will overwrite the current file at $ETC/$WHITELIST_FILENAME"
+    echo "";echo "  INFO: this will backup the current file at $ETC/old.$WHITELIST_FILENAME"
     read -p "     Install Default Whitelist Config of Games?   [y] $> " SAY
 
     if [ "$SAY" == y ];then

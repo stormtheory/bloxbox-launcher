@@ -186,14 +186,14 @@ if [ ! -f $ENV/.bloxbox-gui ];then
 
     # Roblox - BloxBox
         if [ "$INSTALL_GAME_BROWSER" == true ];then
+            export TMPDIR=$ENV/tmp
+            mkdir -p $ENV/tmp
             pip install pywebview
             if [ "$?" != 0 ];then
                 echo "  ERROR"
                 exit
             fi
-            #export TMPDIR=$ENV/tmp
-            #mkdir -p $ENV/tmp
-            #pip install PyGObject  ### this maybe python3-gi
+            #pip install PyGObject  ### this is python3-gi
             #if [ "$?" != 0 ];then
             #    echo "  ERROR"
             #    exit
