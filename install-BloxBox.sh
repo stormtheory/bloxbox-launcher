@@ -108,10 +108,16 @@ echo '{
       "url": "https://www.roblox.com/games/5233782396/Creatures-of-Sonaria-Survive-Kaiju-Animals"
     },
     {
-      "name": "\ud83c\udfc0Basketball Legends\ud83c\udfc0 14259168147",
+      "name": "\ud83c\udfc0Basketball Legends\ud83c\udfc0",
       "place_id": "14259168147",
       "description": "",
       "url": "https://www.roblox.com/games/14259168147/Basketball-Legends"
+    },
+    {
+      "name": "Brookhaven \ud83c\udfe1",
+      "place_id": "4924922222",
+      "url": "https://www.roblox.com/games/4924922222/Brookhaven-RP",
+      "description": ""
     },
     {
       "name": "Bike of Hell",
@@ -126,11 +132,6 @@ echo '{
     {
       "name": "Car Suspension Test",
       "place_id": "6816975827",
-      "description": ""
-    },
-    {
-      "name": "PET PARTY \ud83c\udf89 RP",
-      "place_id": "11497119928",
       "description": ""
     },
     {
@@ -149,11 +150,6 @@ echo '{
       "description": ""
     },
     {
-      "name": "Brookhaven \ud83c\udfe1",
-      "place_id": "4924922222",
-      "description": ""
-    },
-    {
       "name": "Basketball: Zero",
       "place_id": "130739873848552",
       "description": ""
@@ -167,6 +163,24 @@ echo '{
       "name": "Washington-District-of-Columbia",
       "place_id": "16545924458",
       "description": ""
+    },
+    {
+      "name": "Thomas and friends musuem",
+      "place_id": "115078406417772",
+      "description": "",
+      "url": "https://www.roblox.com/games/115078406417772/Thomas-and-friends-musuem"
+    },
+    {
+      "name": "Math Tower \ud83e\udde0",
+      "place_id": "76490888522129",
+      "description": "",
+      "url": "https://www.roblox.com/games/76490888522129/Math-Tower"
+    },
+    {
+      "name": "Infinite Math \ud83e\udde0",
+      "place_id": "77972109461154",
+      "description": "",
+      "url": "https://www.roblox.com/games/77972109461154/Infinite-Math"
     }
   ]
 }
