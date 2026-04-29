@@ -48,8 +48,10 @@ fi
     chmod 700 $DIR/admin.py
     chown root:root -R $DIR
     chown root:root -R $ETC
- 
-    if [ ! -f $ETC/config.py ];then
+
+
+INSTALL_ETC_CONFIG() {
+    if [ -z $child_USERNAME ];then
        echo '';echo "  INFO: Child's username will be installed into the configuration file. $ETC/config.py"
        read -p "    What is the child's username?  $> " child_USERNAME
    
@@ -62,6 +64,11 @@ fi
         else
           echo "ERROR: \$child_USERNAME not found"
           exit
+        fi
+
+        if [ -f $ETC/config.py ];then
+          mv $ETC/config.py $ETC/old.config.py
+          chmod 600 $ETC/old.config.py
         fi
 
 #### CONFIG FILE
@@ -91,8 +98,14 @@ FALLBACK_REQUESTS = Path.home() / \".bloxbox_requests.json\"" > $ETC/config.py
    fi 
         chmod 644 $ETC/config.py
         chown root:root -R $ETC
+}
 
 DEFAULT_JSON() {
+  if [ -f $ETC/$WHITELIST_FILENAME ];then
+    mv $ETC/$WHITELIST_FILENAME $ETC/old.$WHITELIST_FILENAME
+    chmod 600 $ETC/old.$WHITELIST_FILENAME
+  fi
+
 echo '{
   "games": [
     {
@@ -211,11 +224,23 @@ ls -al $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
 
 
 
+if [ ! -f $ETC/config.py ];then
+  INSTALL_ETC_CONFIG
+else
+    echo "";echo "  INFO: this will backup the current file at $ETC/old.config.py"
+    read -p "     Install [Default/New/Fresh]  /etc/config.py?   [y] $> " SAYnoMore
+
+    if [ "$SAYnoMore" == y ];then
+        INSTALL_ETC_CONFIG
+    fi
+fi
+
+
 if [ ! -f $ETC/$WHITELIST_FILENAME ];then
     sudo python3 $DIR/admin.py init
     DEFAULT_JSON
 else
-    echo "";echo "  WARNING: this will overwrite the current file at $ETC/$WHITELIST_FILENAME"
+    echo "";echo "  INFO: this will backup the current file at $ETC/old.$WHITELIST_FILENAME"
     read -p "     Install Default Whitelist Config of Games?   [y] $> " SAY
 
     if [ "$SAY" == y ];then
