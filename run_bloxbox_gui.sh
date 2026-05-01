@@ -10,6 +10,8 @@ Usage: $(basename "$0") [OPTIONS]
 
 Options:
   -d             Debug mode
+  -l             Show Game Log ouput
+
   -c             Code
   -u             Bypass Lock
   -h             Show this help message
@@ -24,17 +26,24 @@ EOF
 # 🔧 Default values
 APP=true
 DEBUG=false
+SHOW_GAME_LOG=false
 CODE=false
 LOCK=true
 INSTALL_GAME_BROWSER=false
 
 # 🔍 Parse options
-while getopts ":dhcuB" opt; do
+while getopts ":dhculB" opt; do
   case ${opt} in
     d)
         DEBUG=true
         APP=false
-        LOCK=true
+        LOCK=false
+        ;;
+    l)
+        DEBUG=true
+        SHOW_GAME_LOG=true
+        LOCK=false
+        APP=false
         ;;
     c)
         CODE=true
@@ -217,6 +226,14 @@ source $ENV/bin/activate
 if [ $CODE == true ];then
                 export PYTHONWARNINGS="ignore"
                 code
+                exit 0
+elif [ "$DEBUG" == true ] | [ "$SHOW_GAME_LOG" == true ];then
+                echo "log"
+                python3 -c "import gi; print('gi ok')"
+                python3 -c "from PIL import Image; print('Pillow ok')"
+                python3 -c "import webview; print('pywebview ok')"
+                echo "Starting Client"
+                python3 bloxbox-launcher.py -d -l
                 exit 0
 elif [ $DEBUG == true ];then
                 export PYTHONWARNINGS="ignore"

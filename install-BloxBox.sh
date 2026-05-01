@@ -52,6 +52,7 @@ fi
     chmod 600 $DIR/tar-up.sh
     chmod 644 $DIR/icon-roblox.png
     chmod 700 $DIR/admin.py
+    chmod 600 $DIR/install-BloxBox.sh
     chown root:root -R $DIR
     chown root:root -R $ETC
 

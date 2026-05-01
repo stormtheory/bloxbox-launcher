@@ -7,11 +7,12 @@ show_help() {
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-  -d             Copy the tar to the downloads dir.
+  -d             Copy the tar to the downloads directory
+  -i             Runs the install-BloxBox.sh script after creating the tar file
   -h             Show this help message
 
 Example:
-  $0 -d
+  $0 -i
 EOF
 }
 
@@ -19,10 +20,13 @@ EOF
 DOWNLOADS=false
 
 # 🔍 Parse options
-while getopts ":dh" opt; do
+while getopts ":idh" opt; do
   case ${opt} in
     d)
         DOWNLOADS=true
+        ;;
+    i)
+        INSTALL=true
         ;;
     h)
       show_help
@@ -58,4 +62,9 @@ fi
 
 if [ "$DOWNLOADS" == true ];then
     cp -v ../bloxbox-roblox-launcher.tgz ~/Downloads
+fi
+
+if [ "$INSTALL" == true ];then
+    echo "Running....  sudo ./install-BloxBox.sh ../bloxbox-roblox-launcher.tgz"
+    sudo ./install-BloxBox.sh ../bloxbox-roblox-launcher.tgz
 fi
