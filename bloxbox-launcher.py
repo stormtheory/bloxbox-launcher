@@ -1080,12 +1080,14 @@ class GameCard(tk.Frame):
         if img is None:
             # No thumbnail available — swap spinner for a game controller emoji
             self.after(0, lambda: self._set_placeholder("🎮"))
+            logging.error('No thumbnail available')
             return
 
         try:
             from PIL import Image, ImageTk
             # Resize to fit the card neatly
             img   = img.resize((THUMB_SIZE, THUMB_SIZE), Image.LANCZOS)
+            logging.debug('resizing thumbnail')
             photo = ImageTk.PhotoImage(img)
 
             # Hold a reference at class level to prevent garbage collection
@@ -1097,6 +1099,7 @@ class GameCard(tk.Frame):
         except ImportError:
             # Pillow not installed — show fallback emoji
             self.after(0, lambda: self._set_placeholder("🎮"))
+            logging.error(f"[launcher] Pillow not installed")
         except Exception as e:
             logging.error(f"[launcher] Thumbnail render failed for {place_id}: {e}")
             self.after(0, lambda: self._set_placeholder("🎮"))
