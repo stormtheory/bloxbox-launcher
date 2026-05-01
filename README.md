@@ -1,5 +1,5 @@
 <h1 align="center">BloxBox</h1>
-<h3 align="center">A safer way to have your kid's play. Since April 2026</h3>
+<h3 align="center">A safer way to have your kids play. Since April 2026</h3>
 
 The Roblox launcher that puts parents in control for Linux. Only showing approved games. The parent-controlled Roblox launcher whitelists approved games, block everything else, and let kids request new ones.
 
@@ -35,6 +35,23 @@ Please submit all problems/issues/sugeestions to https://github.com/stormtheory/
         ## Installs the package in /opt/bloxbox-launcher and /etc/bloxbox
         ## If selected will install a default game config in /etc/bloxbox
                 sudo ./install-BloxBox.sh ../bloxbox-roblox-launcher.tgz
+
+## Game Manage / Approvals / Requests
+        ## Use the following command and arguments:
+                sudo /opt/bloxbox-launcher/admin.py init            — first-time setup
+                sudo /opt/bloxbox-launcher/admin.py list            — show approved games
+                sudo /opt/bloxbox-launcher/admin.py add             — approve a new game
+                sudo /opt/bloxbox-launcher/admin.py remove          — remove an approved game
+                sudo /opt/bloxbox-launcher/admin.py requests        — view pending requests from child
+                sudo /opt/bloxbox-launcher/admin.py clear-requests  — clear all reviewed requests
+
+
+## File locations
+        /usr/share/applications/bloxbox.desktop
+        /home/{user}/Desktop/bloxbox.desktop
+
+        /etc/bloxbox/config.py
+        /opt/bloxbox-launcher/admin.py
 
 
 # User Agreement:

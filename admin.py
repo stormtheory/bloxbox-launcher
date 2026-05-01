@@ -6,12 +6,12 @@ Must be run with sudo to write to /etc/bloxbox_whitelist.json.
 The child's account cannot run this without the root password.
 
 Usage:
-  sudo python3 admin.py init            — first-time setup
-  sudo python3 admin.py list            — show approved games
-  sudo python3 admin.py add             — approve a new game
-  sudo python3 admin.py remove          — remove an approved game
-  sudo python3 admin.py requests        — view pending requests from child
-  sudo python3 admin.py clear-requests  — clear all reviewed requests
+  sudo admin.py init            — first-time setup
+  sudo admin.py list            — show approved games
+  sudo admin.py add             — approve a new game
+  sudo admin.py remove          — remove an approved game
+  sudo admin.py requests        — view pending requests from child
+  sudo admin.py clear-requests  — clear all reviewed requests
 """
 
 import json
@@ -30,18 +30,14 @@ _spec.loader.exec_module(_config)
 
 # Reference values directly
 CONFIG_PATH = _config.CONFIG_PATH
-FALLBACK_CONFIG = _config.FALLBACK_CONFIG
-FALLBACK_REQUESTS = _config.FALLBACK_REQUESTS
 CACHE_DIR = _config.CACHE_DIR
 CHILD_USER = _config.CHILD_USER
 REQUESTS_PATH  = _config.REQUESTS_PATH
 
 # Fallback for testing without root (remove in production)
 if os.geteuid() != 0:
-    #CONFIG_PATH   = str(Path.home() / ".roblox_whitelist.json")
-    #REQUESTS_PATH = str(Path.home() / ".bloxbox_requests.json")
-    print("[admin] ⚠️  Not running as root — using home directory fallbacks")
-    print("[admin] Run with sudo for the real config.\n")
+    print("[admin] ⚠️  Not running as root")
+    print("[admin] Run with sudo.\n")
     sys.exit(1)
 
 

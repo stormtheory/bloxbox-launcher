@@ -57,8 +57,6 @@ _spec.loader.exec_module(_config)
 
 # Reference values directly
 CONFIG_PATH = _config.CONFIG_PATH
-FALLBACK_CONFIG = _config.FALLBACK_CONFIG
-FALLBACK_REQUESTS = _config.FALLBACK_REQUESTS
 CACHE_DIR = _config.CACHE_DIR
 CHILD_USER = _config.CHILD_USER
 REQUESTS_PATH  = _config.CLIENT_REQUESTS_PATH
@@ -101,7 +99,7 @@ def load_config() -> list:
     Falls back to home directory config if /etc version is missing (dev/test mode).
     Returns a list of game dicts: [{name, place_id, description}, ...]
     """
-    for path in [CONFIG_PATH, str(FALLBACK_CONFIG)]:
+    for path in [CONFIG_PATH]:
         if os.path.exists(path):
             try:
                 with open(path) as f:
