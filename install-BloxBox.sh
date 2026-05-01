@@ -116,8 +116,8 @@ REQUESTS_PATH = f\"/home/{CHILD_USER}/.cache/bloxbox_launcher/requests.json\"
 CACHE_DIR     = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"thumbnails\"
 CLIENT_REQUESTS_PATH = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"requests.json\"
 
-GAME_CATEGORIES = \"\"
-GAME_UNSORTED_CATEGORY = \"🔧 Unsorted\"
+GAME_CATEGORIES = ['🎭 Role Playing', '🏎️ Racing', '👨‍👩‍👧 Family', '📚 Education', '🌍 World Exploring']
+GAME_UNSORTED_CATEGORY = '🔧 Unsorted'
 
 LOCK_REQUEST_GAMES = \"$LOCK_REQUEST_GAMES\" # True / False
 LOCK_REQUEST_PIN_PASS_HASH = \"$LOCK_REQUEST_PIN_PASS_HASH\"
@@ -146,12 +146,14 @@ echo '{
     {
       "name": "[\ud83c\udf7c] Welcome to Bloxburg \ud83c\udfe1",
       "place_id": "185655149",
+      "category": "Role Playing",
       "description": "",
       "url": "https://www.roblox.com/games/185655149/Welcome-to-Bloxburg"
     },
     {
       "name": "\ud83d\udc23 Creatures of Sonaria \ud83d\udc07",
       "place_id": "5233782396",
+      "category": "Role Playing",
       "description": "",
       "url": "https://www.roblox.com/games/5233782396/Creatures-of-Sonaria-Survive-Kaiju-Animals"
     },
@@ -165,11 +167,13 @@ echo '{
       "name": "Brookhaven \ud83c\udfe1",
       "place_id": "4924922222",
       "url": "https://www.roblox.com/games/4924922222/Brookhaven-RP",
+      "category": "Role Playing",
       "description": ""
     },
     {
       "name": "Bike of Hell",
       "place_id": "14943334555",
+      "category": "Racing",
       "description": ""
     },
     {
@@ -180,21 +184,25 @@ echo '{
     {
       "name": "Car Suspension Test",
       "place_id": "6816975827",
+      "category": "Racing",
       "description": ""
     },
     {
       "name": "Driving-Empire-Car-Racing",
       "place_id": "3351674303",
+      "category": "Racing",
       "description": ""
     },
     {
       "name": "Feather Family",
       "place_id": "1365404657",
+      "category": "Family",
       "description": ""
     },
     {
       "name": "Car Crushers 2",
       "place_id": "654732683",
+      "category": "Racing",
       "description": ""
     },
     {
@@ -205,17 +213,20 @@ echo '{
     {
       "name": "United States Capitol [RP]",
       "place_id": "120992074793516",
+      "category": "Education",
       "description": ""
     },
     {
       "name": "Math Tower \ud83e\udde0",
       "place_id": "76490888522129",
+      "category": "Education",
       "description": "",
       "url": "https://www.roblox.com/games/76490888522129/Math-Tower"
     },
     {
       "name": "Infinite Math \ud83e\udde0",
       "place_id": "77972109461154",
+      "category": "Education",
       "description": "",
       "url": "https://www.roblox.com/games/77972109461154/Infinite-Math"
     }
