@@ -27,11 +27,25 @@ import sys
 import os
 import time
 import hashlib
+import logging
+import argparse
 
 try:
     import webview
 except:
     print("Can't import webview.")
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--debug", action='store_true', help='Run GUI in debug mode')
+parser.add_argument("-l", "--game-log-output", action='store_true', help='GUI outputs the raw game log output used for debugging.')
+args = parser.parse_args()
+
+# SET LOGGING LEVEL
+logger = logging.getLogger()
+if args.debug:
+    logger.setLevel(logging.DEBUG)     # INFO, DEBUG
+else:
+    logger.setLevel(logging.INFO)     # INFO, DEBUG
 
 # Load system config from /etc — keeps config out of the app directory
 _spec = importlib.util.spec_from_file_location("config", "/etc/bloxbox/config.py")
@@ -93,7 +107,7 @@ def load_config() -> list:
                 with open(path) as f:
                     return json.load(f).get("games", [])
             except (json.JSONDecodeError, PermissionError) as e:
-                print(f"[launcher] Could not read config {path}: {e}")
+                logging.error(f"[launcher] Could not read config {path}: {e}")
     return []
 
 
@@ -109,16 +123,16 @@ def load_requests() -> list:
             with open(path) as f:
                 return json.load(f).get("requests", [])
         except (json.JSONDecodeError, PermissionError) as e:
-            print(f"[launcher] Could not read requests file: {e}")
+            logging.error(f"[launcher] Could not read requests file: {e}")
     return []
 
 def save_request(place_id: str, game_name: str, note: str, url: str = "") -> bool:
-    print(f"[bloxbox] save_request called: {place_id} / {game_name}")
-    print(f"[bloxbox] REQUESTS_PATH: {REQUESTS_PATH}")
-    print(f"[bloxbox] File exists: {os.path.exists(REQUESTS_PATH)}")
+    logging.debug(f"[bloxbox] save_request called: {place_id} / {game_name}")
+    logging.debug(f"[bloxbox] REQUESTS_PATH: {REQUESTS_PATH}")
+    logging.debug(f"[bloxbox] File exists: {os.path.exists(REQUESTS_PATH)}")
     
     requests = load_requests()
-    print(f"[bloxbox] Existing requests: {len(requests)}")
+    logging.debug(f"[bloxbox] Existing requests: {len(requests)}")
     
     requests.append({
         "place_id":  place_id.strip(),
@@ -131,10 +145,10 @@ def save_request(place_id: str, game_name: str, note: str, url: str = "") -> boo
     try:
         with open(REQUESTS_PATH, "w") as f:
             json.dump({"requests": requests}, f, indent=2)
-        print(f"[bloxbox] Request saved → {REQUESTS_PATH}")
+        logging.debug(f"[bloxbox] Request saved → {REQUESTS_PATH}")
         return True
     except Exception as e:
-        print(f"[bloxbox] Failed to save request: {e}")
+        logging.error(f"[bloxbox] Failed to save request: {e}")
         return False
 
 
@@ -147,7 +161,7 @@ def verify_pin(input_pin: str) -> bool:
     
 def terminateSober():
     result =subprocess.run("pkill sober", shell=True, check=False)
-    print(f"[bloxbox] pkill exit code: {result.returncode}")
+    logging.info(f"[bloxbox] pkill exit code: {result.returncode}")
 
 # ── Thumbnail fetching ────────────────────────────────────────────────────────
 
@@ -165,7 +179,7 @@ def fetch_thumbnail_url(place_id: str) -> str | None:
             if items and items[0].get("imageUrl"):
                 return items[0]["imageUrl"]
     except Exception as e:
-        print(f"[launcher] Thumbnail URL fetch failed for place {place_id}: {e}")
+        logging.error(f"[launcher] Thumbnail URL fetch failed for place {place_id}: {e}")
     return None
 
 def fetch_game_name(place_id: str) -> str:
@@ -180,7 +194,7 @@ def fetch_game_name(place_id: str) -> str:
             data = json.loads(r.read())
             return data.get("Name")
     except Exception as e:
-        print(f"[bloxbox] Game name lookup failed for {place_id}: {e}")
+        logging.error(f"[bloxbox] Game name lookup failed for {place_id}: {e}")
     return None
 
 def fetch_thumbnail_image(place_id: str):
@@ -202,7 +216,7 @@ def fetch_thumbnail_image(place_id: str):
             from PIL import Image
             return Image.open(cache_file)
         except Exception as e:
-            print(f"[launcher] Cache read failed for {place_id}: {e}")
+            logging.error(f"[launcher] Cache read failed for {place_id}: {e}")
             cache_file.unlink(missing_ok=True)  # Purge corrupt cache file
 
     # ── Cache miss — fetch directly using place ID ────────────────────────
@@ -223,10 +237,10 @@ def fetch_thumbnail_image(place_id: str):
         return Image.open(io.BytesIO(img_data))
 
     except ImportError:
-        print("[launcher] Pillow not installed — install with: pip3 install Pillow --break-system-packages")
+        logging.error("[launcher] Pillow not installed")
         return None
     except Exception as e:
-        print(f"[launcher] Thumbnail download failed for place {place_id}: {e}")
+        logging.error(f"[launcher] Thumbnail download failed for place {place_id}: {e}")
         return None
 
 def _monitor_sober_log(proc: subprocess.Popen, game_name: str):
@@ -245,11 +259,6 @@ def _monitor_sober_log(proc: subprocess.Popen, game_name: str):
             "Roblox reported a network or authentication error.\n\n"
             "Check your internet connection and try again."
         ),
-        "524": (
-            "Error 524 — Server Timeout",
-            "The Roblox game server didn't respond in time.\n\n"
-            "This is a temporary Roblox issue — wait a minute and try again."
-        ),
         "SessionReporterState_GameExitRequested": (
             "Kicked by Server",
             "The Roblox server ended the session before the game started.\n\n"
@@ -257,20 +266,35 @@ def _monitor_sober_log(proc: subprocess.Popen, game_name: str):
         ),
     }
 
+    WATCH_PATTERNS = {
+        "524": ("Error 524 — Server Timeout"),
+        "server": ("The Roblox game server didn't respond in time.\n\n"),
+        "Wait": ("This is a temporary Roblox issue — wait a minute and try again."),
+    }
+
     detected_error = None
 
     try:
         for raw_line in proc.stdout:
             line = raw_line.decode("utf-8", errors="replace").strip()
+
+            if args.game_log_output:
+                logging.debug(f"{line}")
+
+            for pattern, error_info in WATCH_PATTERNS.items():
+                if pattern in line:
+                    detected_error = error_info
+                    logging.error(f"[bloxbox] Watch Error detected: {pattern}")
+
             for pattern, error_info in ERROR_PATTERNS.items():
                 if pattern in line:
                     detected_error = error_info
-                    print(f"[bloxbox] Error detected: {pattern}")
+                    logging.error(f"[bloxbox] Error detected: {pattern}")
                     break
             if detected_error:
                 break
     except Exception as e:
-        print(f"[bloxbox] Monitor thread error: {e}")
+        logging.error(f"[bloxbox] Monitor thread error: {e}")
         return
 
     if detected_error:
@@ -297,7 +321,7 @@ def launch_game(place_id: str, game_name: str):
     """
     place_id = str(place_id).strip()
     uri      = f"roblox://experiences/start?placeId={place_id}"
-    print(f"[launcher] Launching '{game_name}' → {uri}")
+    logging.info(f"[launcher] Launching '{game_name}' → {uri}")
 
     # ── Strategy 1: Flatpak Sober ─────────────────────────────────────────
     # Pass the full roblox:// URI — bare place ID is silently ignored by Sober.
@@ -315,7 +339,7 @@ def launch_game(place_id: str, game_name: str):
         ).start()
         return  # Handed off to Sober — done
     except FileNotFoundError:
-        print("[launcher] flatpak not found, falling back to xdg-open...")
+        logging.error("[launcher] flatpak not found, falling back to xdg-open...")
 
     # ── Strategy 2: xdg-open roblox:// URI ───────────────────────────────
     # Works if Sober registered the roblox:// protocol handler during install
@@ -466,7 +490,7 @@ class RequestDialog:
                     url = dialog.window.get_current_url()
                     if url and url != last_url[0]:
                         last_url[0] = url
-                        print(f"[bloxbox] URL changed → {url}")
+                        logging.info(f"[bloxbox] URL changed → {url}")
 
                         # Check if this is a game page
                         match = re.search(r"/games/(\d+)", url)
@@ -478,7 +502,7 @@ class RequestDialog:
                             _tk_root_ref.after(0, hide_overlay)
 
                 except Exception as e:
-                    print(f"[bloxbox] URL poll error: {e}")
+                    logging.error(f"[bloxbox] URL poll error: {e}")
 
                 time.sleep(0.5)
 
@@ -580,7 +604,7 @@ class RequestDialog:
                 overlay_win[0] = None
 
         def on_request(place_id: str, game_name: str, url: str):
-            print(f"[bloxbox] Request triggered for place ID: {place_id}")
+            logging.info(f"[bloxbox] Request triggered for place ID: {place_id}")
             detecting[0] = False
             hide_overlay()
             dialog._pending_place_id  = place_id
@@ -625,7 +649,7 @@ class RequestDialog:
         Shows thumbnail preview, optional note field, and submit/cancel buttons.
         Shown after webview has closed and Tkinter is restored.
         """
-        print(f"[bloxbox] _confirm_request called: {place_id} / {game_name}")
+        logging.debug(f"[bloxbox] _confirm_request called: {place_id} / {game_name}")
         win = tk.Toplevel(self.parent)
         win.title("Confirm Request")
         win.configure(bg=BG_COLOR)
@@ -690,21 +714,21 @@ class RequestDialog:
                 return
             try:
                 from PIL import Image, ImageTk
-                print(f"[bloxbox] resizing {place_id}...")
+                logging.debug(f"[bloxbox] resizing {place_id}...")
                 with urllib.request.urlopen(thumb_url, timeout=8) as r:
                     img   = Image.open(io.BytesIO(r.read()))
                     img   = img.resize((100, 100), Image.LANCZOS)
-                    print(f"[bloxbox] creating PhotoImage {place_id}...")
+                    logging.debug(f"[bloxbox] creating PhotoImage {place_id}...")
                     photo = ImageTk.PhotoImage(img)
-                    print(f"[bloxbox] PhotoImage created {place_id}")
+                    logging.debug(f"[bloxbox] PhotoImage created {place_id}")
                     GameCard._image_refs.append(photo)  # Prevent GC
                     win.after(0, lambda: thumb_label.config(image=photo, text=""))
             except ImportError:
-                print(f"[bloxbox] Pillow not installed")
+                logging.debug(f"[bloxbox] Pillow not installed")
                 self.after(0, lambda: self._set_placeholder("🎮"))
             except Exception:
                 import traceback
-                print(f"[bloxbox] Thumbnail render failed for {place_id}: {e}")
+                logging.debug(f"[bloxbox] Thumbnail render failed for {place_id}: {e}")
                 traceback.print_exc()
                 win.after(0, lambda: thumb_label.config(text="🎮"))
 
@@ -1049,9 +1073,9 @@ class GameCard(tk.Frame):
         — touching Tkinter widgets directly from threads causes crashes.
         """
         place_id = self.game.get("place_id", "")
-        print(f"[bloxbox] Loading thumbnail for {place_id}")
+        logging.debug(f"[bloxbox] Loading thumbnail for {place_id}")
         img      = fetch_thumbnail_image(place_id)
-        print(f"[bloxbox] fetch_thumbnail_image returned: {img}")
+        logging.debug(f"[bloxbox] fetch_thumbnail_image returned: {img}")
 
         if img is None:
             # No thumbnail available — swap spinner for a game controller emoji
@@ -1074,18 +1098,18 @@ class GameCard(tk.Frame):
             # Pillow not installed — show fallback emoji
             self.after(0, lambda: self._set_placeholder("🎮"))
         except Exception as e:
-            print(f"[launcher] Thumbnail render failed for {place_id}: {e}")
+            logging.error(f"[launcher] Thumbnail render failed for {place_id}: {e}")
             self.after(0, lambda: self._set_placeholder("🎮"))
 
     def _set_thumbnail(self, photo):
         """Swap the loading placeholder with the actual thumbnail image."""
-        print(f"[bloxbox] _set_thumbnail called, widget exists: {self.thumb_label.winfo_exists()}")
+        logging.debug(f"[bloxbox] _set_thumbnail called, widget exists: {self.thumb_label.winfo_exists()}")
         if self.thumb_label and self.thumb_label.winfo_exists():
             self.thumb_label.config(
                 image=photo, text="",
                 width=THUMB_SIZE, height=THUMB_SIZE
             )
-            print(f"[bloxbox] thumbnail set ok")
+            logging.debug(f"[bloxbox] thumbnail set ok")
 
     def _set_placeholder(self, emoji: str):
         """Replace the spinner with a fallback emoji (Pillow missing or API failed)."""
@@ -1379,9 +1403,8 @@ if __name__ == "__main__":
     try:
         import PIL
     except ImportError:
-        print("[launcher] ⚠️  Pillow not installed — thumbnails disabled.")
-        print("[launcher]    Fix: pip3 install Pillow --break-system-packages")
-
+        logging.error("[launcher] ⚠️  Pillow not installed — thumbnails disabled.")
+        
     app = LauncherApp()
     app.geometry("940x680")
     app.mainloop()

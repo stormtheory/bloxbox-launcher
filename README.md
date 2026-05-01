@@ -28,8 +28,9 @@ Please submit all problems/issues/sugeestions to https://github.com/stormtheory/
         sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
 ## Install BloxBox
-        ## Create the tar file of this directory to be installed in /opt
-                ./tar-up.sh
+        ## Create the tar file of this directory to be installed in the /opt directory.
+            # -i arguments removes the need for running install-BloxBox.sh directly.
+                ./tar-up.sh -i
         
         ## Installs the package in /opt/bloxbox-launcher and /etc/bloxbox
         ## If selected will install a default game config in /etc/bloxbox

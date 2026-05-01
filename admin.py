@@ -113,8 +113,8 @@ def save_requests(requests: list):
         json.dump({"requests": requests}, f, indent=2)
     # 622 = root read/write, everyone else write-only (can't read others' requests)
     import shutil
-    os.chmod(REQUESTS_PATH, 0o640)
-    shutil.chown(REQUESTS_PATH, user=CHILD_USER, group=CHILD_USER)
+    os.chmod(REQUESTS_PATH, 0o622)
+    shutil.chown(REQUESTS_PATH, user='root', group='root')
     print(f"[admin] ✅  Requests file saved → {REQUESTS_PATH}")
 
 
@@ -301,12 +301,12 @@ def cmd_init():
     if not os.path.exists(REQUESTS_PATH):
         save_requests([])
         print(f"[admin] ✅  Requests file created → {REQUESTS_PATH}")
-        shutil.chown(REQUESTS_PATH, user=CHILD_USER, group=CHILD_USER)
-        os.chmod(REQUESTS_PATH, 0o640)
+        shutil.chown(REQUESTS_PATH, user='root', group='root')
+        os.chmod(REQUESTS_PATH, 0o622)
     else:
         print(f"[admin] ℹ️   Requests file already exists → {REQUESTS_PATH}")
-        shutil.chown(REQUESTS_PATH, user=CHILD_USER, group=CHILD_USER)
-        os.chmod(REQUESTS_PATH, 0o640)
+        shutil.chown(REQUESTS_PATH, user='root', group='root')
+        os.chmod(REQUESTS_PATH, 0o622)
     
     print("\n[admin] Setup complete. Next steps:")
     print("  sudo python3 admin.py add      — approve your first game")
