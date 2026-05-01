@@ -53,6 +53,8 @@ fi
     chmod 644 $DIR/icon-roblox.png
     chmod 700 $DIR/admin.py
     chmod 600 $DIR/install-BloxBox.sh
+    chmod 755 $DIR/icon
+    chmod 644 $DIR/icon/*
     chown root:root -R $DIR
     chown root:root -R $ETC
 
@@ -226,8 +228,8 @@ Type=Application
 Name=Bloxbox Roblox Launcher
 GenericName=Bloxbox Roblox Launcher
 Comment=Play, chat & explore more safely on Roblox
-Icon=/opt/bloxbox-launcher/icon-roblox.png
-Exec=/opt/bloxbox-launcher/run_bloxbox_gui.sh
+Icon=/opt/bloxbox-launcher/icon/bloxbox-icon.svg
+Exec=/opt/bloxbox-launcher/icon/run_bloxbox_gui.sh
 Name[en_US]=Bloxbox Roblox Launcher
 Keywords=roblox;vinegar;game;gaming;social;experience;launcher;
 MimeType=x-scheme-handler/roblox;x-scheme-handler/roblox-player;
@@ -247,7 +249,7 @@ Type=Application
 Name=Bloxbox Roblox Launcher
 GenericName=Bloxbox Roblox Launcher
 Comment=Play, chat & explore more safely on Roblox
-Icon=/opt/bloxbox-launcher/icon-roblox.png
+Icon=/opt/bloxbox-launcher/icon/bloxbox-icon.svg
 Exec=/opt/bloxbox-launcher/run_bloxbox_gui.sh
 Name[en_US]=Bloxbox Roblox Launcher
 Keywords=roblox;vinegar;game;gaming;social;experience;launcher;
