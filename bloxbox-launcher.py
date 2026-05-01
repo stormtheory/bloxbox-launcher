@@ -280,11 +280,10 @@ def _monitor_sober_log(proc: subprocess.Popen, game_name: str):
 
             if args.game_log_output:
                 logging.debug(f"{line}")
-
-            for pattern, error_info in WATCH_PATTERNS.items():
-                if pattern in line:
-                    detected_error = error_info
-                    logging.error(f"[bloxbox] Watch Error detected: {pattern}")
+            if args.debug:
+                for pattern, error_watch_info in WATCH_PATTERNS.items():
+                    if pattern in line:
+                        logging.error(f"[bloxbox] Watch Error detected: {pattern}")
 
             for pattern, error_info in ERROR_PATTERNS.items():
                 if pattern in line:
