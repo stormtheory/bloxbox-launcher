@@ -1,5 +1,5 @@
 <h1 align="center">BloxBox</h1>
-<h3 align="center">A safer way to have your kid's play. Since April 2026</h3>
+<h3 align="center">A safer way to have your kids play. Since April 2026</h3>
 
 The Roblox launcher that puts parents in control for Linux. Only showing approved games. The parent-controlled Roblox launcher whitelists approved games, block everything else, and let kids request new ones.
 

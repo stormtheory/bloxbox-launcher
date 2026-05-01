@@ -111,19 +111,23 @@ ROBLOX_GAME_SEARCH_URL = \"https://www.roblox.com/charts?device=computer&country
 # Parent reads it with: sudo cat /home/CHILDNAME/.bloxbox_requests.json
 REQUESTS_PATH = f\"/home/{CHILD_USER}/.cache/bloxbox_launcher/requests.json\"
 
+### Launcher GUI
 # Thumbnail cache directory — stored in child's home, safe to delete any time
 CACHE_DIR     = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"thumbnails\"
 CLIENT_REQUESTS_PATH = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"requests.json\"
-CLIENT_SORT_CATEGORIES = \"\"
+
+GAME_CATEGORIES = \"\"
+GAME_UNSORTED_CATEGORY = \"🔧 Unsorted\"
 
 LOCK_REQUEST_GAMES = \"$LOCK_REQUEST_GAMES\" # True / False
 LOCK_REQUEST_PIN_PASS_HASH = \"$LOCK_REQUEST_PIN_PASS_HASH\"
-LOCK_APPROVAL = \"True\"    # True / False
+
+GAME_APPROVAL_NEEDED = \"True\"     # True / False
+LOCK_APPROVAL_PIN = \"True\"        # True / False
 LOCK_APPROVAL_PIN_PASS_HASH = \"\"
 
-# Fallback configs for testing without root (remove in production)
-FALLBACK_CONFIG   = Path.home() / \".roblox_whitelist.json\"
-FALLBACK_REQUESTS = Path.home() / \".bloxbox_requests.json\"" > $ETC/config.py
+ROBLOX_GAME_SEARCH_URL = 'https://www.roblox.com/charts?device=computer&country=us'
+" > $ETC/config.py
         chmod 644 $ETC/config.py
         chown root:root -R $ETC
    fi 
