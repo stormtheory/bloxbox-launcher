@@ -36,6 +36,23 @@ Please submit all problems/issues/sugeestions to https://github.com/stormtheory/
         ## If selected will install a default game config in /etc/bloxbox
                 sudo ./install-BloxBox.sh ../bloxbox-roblox-launcher.tgz
 
+## Game Manage / Approvals / Requests
+        ## Use the following command and arguments:
+                sudo /opt/bloxbox-launcher/admin.py init            — first-time setup
+                sudo /opt/bloxbox-launcher/admin.py list            — show approved games
+                sudo /opt/bloxbox-launcher/admin.py add             — approve a new game
+                sudo /opt/bloxbox-launcher/admin.py remove          — remove an approved game
+                sudo /opt/bloxbox-launcher/admin.py requests        — view pending requests from child
+                sudo /opt/bloxbox-launcher/admin.py clear-requests  — clear all reviewed requests
+
+
+## File locations
+        /usr/share/applications/bloxbox.desktop
+        /home/{user}/Desktop/bloxbox.desktop
+
+        /etc/bloxbox/config.py
+        /opt/bloxbox-launcher/admin.py
+
 
 # User Agreement:
 This project is a community-driven initiative, not a company or commercial entity.

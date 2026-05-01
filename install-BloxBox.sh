@@ -50,7 +50,6 @@ fi
     chmod 755 $DIR/*.sh
     chmod 644 $DIR/*.py
     chmod 600 $DIR/tar-up.sh
-    chmod 644 $DIR/icon-roblox.png
     chmod 700 $DIR/admin.py
     chmod 600 $DIR/install-BloxBox.sh
     chmod 755 $DIR/icon
@@ -115,9 +114,12 @@ REQUESTS_PATH = f\"/home/{CHILD_USER}/.cache/bloxbox_launcher/requests.json\"
 # Thumbnail cache directory — stored in child's home, safe to delete any time
 CACHE_DIR     = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"thumbnails\"
 CLIENT_REQUESTS_PATH = Path.home() / \".cache\" / \"bloxbox_launcher\" / \"requests.json\"
+CLIENT_SORT_CATEGORIES = \"\"
 
 LOCK_REQUEST_GAMES = \"$LOCK_REQUEST_GAMES\" # True / False
 LOCK_REQUEST_PIN_PASS_HASH = \"$LOCK_REQUEST_PIN_PASS_HASH\"
+LOCK_APPROVAL = \"True\"    # True / False
+LOCK_APPROVAL_PIN_PASS_HASH = \"\"
 
 # Fallback configs for testing without root (remove in production)
 FALLBACK_CONFIG   = Path.home() / \".roblox_whitelist.json\"
