@@ -32,7 +32,7 @@ fi
     SU_USER=
     DIR=/opt/bloxbox-launcher
     ETC=/etc/bloxbox
-    DECKTOP_ICON_FILENAME=Roblox-Sober.desktop
+    DECKTOP_ICON_FILENAME=bloxbox.desktop
     WHITELIST_FILENAME=roblox_whitelist.json
     APP_WINDOW_TITLE_NAME='BloxBox'
     
@@ -200,17 +200,6 @@ echo '{
       "description": ""
     },
     {
-      "name": "Washington-District-of-Columbia",
-      "place_id": "16545924458",
-      "description": ""
-    },
-    {
-      "name": "Thomas and friends musuem",
-      "place_id": "115078406417772",
-      "description": "",
-      "url": "https://www.roblox.com/games/115078406417772/Thomas-and-friends-musuem"
-    },
-    {
       "name": "Math Tower \ud83e\udde0",
       "place_id": "76490888522129",
       "description": "",
@@ -234,17 +223,44 @@ ls -al $ETC/$WHITELIST_FILENAME
 DEFAULT_DESKTOP_ICON() {
 echo '[Desktop Entry]
 Type=Application
-Name=Roblox - Sober
+Name=Bloxbox Roblox Launcher
+GenericName=Bloxbox Roblox Launcher
+Comment=Play, chat & explore more safely on Roblox
 Icon=/opt/bloxbox-launcher/icon-roblox.png
 Exec=/opt/bloxbox-launcher/run_bloxbox_gui.sh
+Name[en_US]=Bloxbox Roblox Launcher
+Keywords=roblox;vinegar;game;gaming;social;experience;launcher;
+MimeType=x-scheme-handler/roblox;x-scheme-handler/roblox-player;
+Categories=Game;
 Terminal=false
-MimeType=application/x-roblox-rbxl;application/x-roblox-rbxlx;x-scheme-handler/roblox-studio;x-scheme-handler/roblox-studio-auth
-Categories=Game
-X-Flatpak=org.vinegarhq.Vinegar
-Name[en_US]=Roblox - Sober'       > $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
+PrefersNonDefaultGPU=true
+Actions=open-settings;
+X-Flatpak=org.vinegarhq.Sober
+'       > /usr/share/applications/$DECKTOP_ICON_FILENAME
+chmod 755 /usr/share/applications/$DECKTOP_ICON_FILENAME
+update-desktop-database
+echo "Desktop Icon placed at: /usr/share/applications/$DECKTOP_ICON_FILENAME"
+ls -al /usr/share/applications/$DECKTOP_ICON_FILENAME
+
+echo '[Desktop Entry]
+Type=Application
+Name=Bloxbox Roblox Launcher
+GenericName=Bloxbox Roblox Launcher
+Comment=Play, chat & explore more safely on Roblox
+Icon=/opt/bloxbox-launcher/icon-roblox.png
+Exec=/opt/bloxbox-launcher/run_bloxbox_gui.sh
+Name[en_US]=Bloxbox Roblox Launcher
+Keywords=roblox;vinegar;game;gaming;social;experience;launcher;
+MimeType=x-scheme-handler/roblox;x-scheme-handler/roblox-player;
+Categories=Game;
+Terminal=false
+PrefersNonDefaultGPU=true
+Actions=open-settings;
+X-Flatpak=org.vinegarhq.Sober
+'       > $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
 chmod 755 $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
-chown root:root $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
-#chown $child_USERNAME:$child_USERNAME $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
+#chown root:root $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
+chown $child_USERNAME:$child_USERNAME $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
 echo "Desktop Icon placed at: $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME"
 ls -al $HOME_DIR/Desktop/$DECKTOP_ICON_FILENAME
 }
