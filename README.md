@@ -1,3 +1,4 @@
+<div align="center"><img width="280" height="280" alt="Image" src="https://github.com/user-attachments/assets/da74118b-c19f-461c-a132-de6bd6ee7719" /></div>
 <h1 align="center">BloxBox</h1>
 <h3 align="center">A safer way to have your kids play. Since April 2026</h3>
 
